@@ -1,0 +1,27 @@
+{
+  "cli": {
+    "version": ">= 3.8.1"
+  },
+  "build": {
+    "release": {
+      "distribution": "store",
+      "android": {
+        "gradleCommand": ":app:bundleRelease"
+      }
+    },
+    "test": {
+      "distribution": "internal",
+      "android": {
+        "gradleCommand": ":app:assembleDebug"
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "android": {
+        "track": "production",
+        "releaseStatus": "completed"
+      }
+    }
+  }
+}

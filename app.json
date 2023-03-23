@@ -1,15 +1,15 @@
 {
   "expo": {
-    "name": "tasks",
-    "slug": "snack-02af953e-e9c0-4769-abe9-e76d0345f6a9",
-    "version": "1.0.0",
+    "name": "Zen AI",
+    "slug": "snack-6bf3a40a-3984-4a02-8585-7af928354efb",
+    "version": "1.0.4",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./ic_launcher.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./zen_splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#08365a"
     },
     "updates": {
       "fallbackToCacheTimeout": 0
@@ -21,18 +21,23 @@
       "supportsTablet": true
     },
     "android": {
+      "versionCode": 3,
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FFFFFF"
-      }
+        "foregroundImage": "./zen_splash.png",
+        "backgroundColor": "#08365a"
+      },
+      "package": "com.zen.ai"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./zen_ai.png"
     },
     "extra": {
       "eas": {
-        "projectId": "2e43fe1b-4f6b-42a4-802a-10a1c03655df"
+        "projectId": "a4a97957-04fb-4751-a41e-a3b49fa75ffa"
       }
-    }
+    },
+    "plugins": [
+      "expo-localization"
+    ]
   }
 }

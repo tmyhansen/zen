@@ -241,7 +241,7 @@ const renderItem = (item, index) => {
             text={value}
             iconStyle={{ borderColor: "white" }}
             innerIconStyle={{ borderWidth: 0 }}
-            textStyle={{ fontFamily: "Roboto", flexWrap: 'wrap'}}
+            textStyle={{ fontFamily: "Roboto", width: 280, flexWrap: 'wrap'}}
             isChecked={checkedItems[value] === 'true' || checkedItems[value] === true}
             onPress={(isChecked) => handleCheckboxChange(value, isChecked)}
           />

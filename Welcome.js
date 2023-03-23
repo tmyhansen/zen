@@ -17,7 +17,7 @@ const supportedLanguages = ['en', 'de', 'es', 'uk', 'fr', 'pl'];
 const languageMapping = { 'nb': 'no' };
 
 const language = supportedLanguages.includes(deviceLanguage) ? (languageMapping[deviceLanguage] || deviceLanguage) : 'en';
-  const [selectedLanguage, setSelectedLanguage] = useState('pl');
+  const [selectedLanguage, setSelectedLanguage] = useState(language);
   const l = getLang(selectedLanguage); // Get the lang object for the current language
   useEffect(() => {
     Animated.timing(fadeAnimation, {
@@ -112,13 +112,13 @@ const styles = StyleSheet.create({
     color: "white"
   },
   text: {
-    fontFamily: 'Roboto, sans-serif',
+    fontFamily: 'Roboto',
     fontSize: 25,
     color: 'white',
     fontWeight: 'bold'
   },
   textRegular: {
-    fontFamily: 'Roboto, sans-serif',
+    fontFamily: 'Roboto',
     fontSize: 16,
     color: 'white',
     fontWeight: 'normal'

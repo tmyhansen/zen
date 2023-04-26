@@ -23,6 +23,7 @@ const TaskList = ({ navigation, route }) => {
   const [imageURL, setImageURL] = useState('');
   const [images, setImages] = useState([]);
   const isMounted = useRef(false);
+  const abortControllerRef = useRef(new AbortController());
 
   const setImageData = (newListParam, newImageUrl) => {
     const existingImage = images.find(image => image.listParam === newListParam);
@@ -35,6 +36,7 @@ const TaskList = ({ navigation, route }) => {
   };
 
 useEffect(() => {
+  retrieveDataOnComponentInit("Week");
   loadImagesFromStorage();
 }, []);
 
@@ -83,6 +85,9 @@ const loadImagesFromStorage = async () => {
       setImageURL(l)
           c(l + imageURL)
     }
+     return () => {
+      abortControllerRef.current.abort();
+    };
 
   }, [listParam]);
 
@@ -91,13 +96,13 @@ const loadImagesFromStorage = async () => {
       const allKeys = await AsyncStorage.getAllKeys();
       const allData = await AsyncStorage.multiGet(allKeys);
 
-      console.log('_____________Start_________________');
+      //console.log('_____________Start_________________');
       allData.forEach(data => {
-        console.log(data[0], ':', data[1]);
+        //console.log(data[0], ':', data[1]);
       });
-      console.log('______________End________________');
+      //console.log('______________End________________');
     } catch (e) {
-      console.log("Error getting all data from AsyncStorage:", e);
+      //console.log("Error getting all data from AsyncStorage:", e);
     }
   }
 
@@ -112,7 +117,7 @@ const loadImagesFromStorage = async () => {
   const l = getLang(selectedLanguage); // Get the lang object for the current language
 
   useEffect(() => {
-    navigation.setOptions({ title: selectedLanguage === 'no' ? "Gjør" : "Do" });
+    navigation.setOptions({ title: selectedLanguage === 'no' ? "Gjøre" : "Do" });
   }, [selectedLanguage, navigation, l]);
 
   useEffect(() => {
@@ -130,8 +135,11 @@ const loadImagesFromStorage = async () => {
   //   logAllData()
   // }, [listValue, listParam, listParams, checkedItems, imageURL]);
 
+  
+
   const retrieveDataOnComponentInit = async (listParam) => {
     try {
+
       // Retrieve listParam, listParams, listValue and checkedItems from AsyncStorage
       const storedListParam = await AsyncStorage.getItem('liste') ?? 'Week';
       const storedListParams = await AsyncStorage.getItem('listParams');
@@ -147,7 +155,7 @@ const loadImagesFromStorage = async () => {
 
       // Update the state for listParams
       if (storedListParams) {
-        setListParams(storedListParams.split(','));
+        setListParams(storedListParams.match(/([^,\s]+(?:\s+[^,\s]+)*)/g));
       } else {
         saveListParamsToAsyncStorage(['Week']);
         setListParams(['Week']);
@@ -277,9 +285,9 @@ const loadImagesFromStorage = async () => {
 
   useEffect(() => {
     if (isMounted.current) {
-      console.log("ListParams updated: " + listParams + " (triggered on update)");
+      //console.log("ListParams updated: " + listParams + " (triggered on update)");
     } else {
-      console.log("ListParams updated: " + listParams + " (triggered on mount)");
+      //console.log("ListParams updated: " + listParams + " (triggered on mount)");
       isMounted.current = true;
     }
   }, [listParams]);
@@ -357,11 +365,11 @@ useEffect(() => {
     try {
       const storedImageURL = await AsyncStorage.getItem(`image_${param}`);
       if (storedImageURL) {
-              debugger;
+              
         setImageURL(storedImageURL);
         setImgLoading(false)
       }else{
-              debugger;
+              
         translateAndGenerateImage(param)
       }
     } catch (error) {
@@ -371,11 +379,17 @@ useEffect(() => {
   };
 
 const generateImage = async (prompt, listParam) => {
+  debugger;
+    // Cancel the previous fetch request
+    abortControllerRef.current.abort();
+    // Create a new AbortController
+    abortControllerRef.current = new AbortController();
   try {
     const response = await fetch('https://innoonni.000webhostapp.com/AI_image.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: `prompt=${encodeURIComponent(prompt)}`,
+      signal: abortControllerRef.current.signal
     });
    //c(prompt)
     const data = await response.json();
@@ -397,6 +411,7 @@ const generateImage = async (prompt, listParam) => {
 
   const translateAndGenerateImage = async (text, listParam) => {
     if(selectedLanguage === "en" || text === "Week"){
+      generateImage(text, listParam)
       return text;
     }
  //c("translateAndGenerate"+ text)
@@ -432,7 +447,7 @@ const generateImage = async (prompt, listParam) => {
     fetch('https://innoonni.000webhostapp.com/AI.php', requestOptions)
       .then(response => response.text())
       .then(data => {
-        console.log(data)
+        //console.log(data)
         if (!data.includes('Undefined property')) {
           const stringWithDaysHyphen = data.replace(/(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday|Mandag|Tirsdag|Onsdag|Torsdag|Fredag|Lørdag|Søndag|Montag|Dienstag|Mittwoch|Donnerstag|Freitag|Samstag|Sonntag|Lunes|Martes|Miércoles|Jueves|Viernes|Sábado|Domingo|Понеділок|Вівторок|Середа|Четвер|Пʼятниця|Субота|Неділя|Lundi|Mardi|Mercredi|Jeudi|Vendredi|Samedi|Dimanche|Poniedziałek|Wtorek|Środa|Czwartek|Piątek|Sobota|Niedziela):/gi, '$1 -');
           let a = stringWithDaysHyphen.replace(/(—|–)/g, '-')
@@ -457,13 +472,12 @@ const generateImage = async (prompt, listParam) => {
   };
 
   useEffect(() => {
-    retrieveDataOnComponentInit("Week");
-  }, []);
-
-  useEffect(() => {
     setDoneEdit(!listValue.includes('-'));
     if(listValue.includes("undefined")){
       setListValue(listValue.replace(/undefined/g, ""));
+    }
+    if(listValue.includes(",")){
+      setListValue(listValue.replace(",", "，"));
     }
   }, [listValue]);
 
@@ -476,7 +490,7 @@ const generateImage = async (prompt, listParam) => {
   }, [listParams]);
 
   const c = (f: any) => {
-    console.log(f)
+    //console.log(f)
   }
 
   useEffect(() => {
@@ -587,6 +601,19 @@ const generateImage = async (prompt, listParam) => {
   };
 
   const clearAll = async () => {
+        Alert.alert(
+          l['OK?'], // Title
+          l['This will delete all your lists and tasks.'],
+          [
+            { text: 'OK', onPress: () => clearAllFinal() },
+            { text: 'Cancel', onPress: () => { console.log('Cancel Pressed');  } },
+          ],
+          { cancelable: true }
+        );
+  };
+
+  const clearAllFinal = async () => {
+
     try {
       await AsyncStorage.clear();
       setImageURL('')
@@ -791,7 +818,7 @@ const generateImage = async (prompt, listParam) => {
               (
                 <View style={[styles.editButtonsContainer, { flex: 0 }]}>
                   <TouchableOpacity onPress={() => newList(value.trim())}>
-                    <Text style={styles.arrowButton}>+</Text>
+                    <Text style={styles.arrowButton}>{listParams.includes(value.trim()) ? "→" : "+"}</Text>
                   </TouchableOpacity>
                   <View>
                     <Text>  </Text>
@@ -811,7 +838,7 @@ const generateImage = async (prompt, listParam) => {
                 text={value}
                 iconStyle={{ borderColor: "white" }}
                 innerIconStyle={{ borderWidth: 0 }}
-                textStyle={{ fontFamily: "Roboto", width: 280, flexWrap: 'wrap' }}
+                textStyle={{ fontFamily: "Roboto", width: 230, flexWrap: 'wrap' }}
                 isChecked={checkedItems[id] === 'true' || checkedItems[id] === true}
                 onPress={(isChecked) => handleCheckboxChange(id, isChecked)}
               />
@@ -873,6 +900,7 @@ const generateImage = async (prompt, listParam) => {
     const newList = async (newListName) => {
       setImageURL('')
       if (listParams.includes(newListName)) {
+        handleLinkPress(newListName)
         console.warn(`List with the name "${newListName}" already exists.`);
         return;
       }

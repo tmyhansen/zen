@@ -36,7 +36,7 @@ const AntiTaskList = ({ navigation, route }) => {
 
       // Update the state for antiListParams
       if (storedAntiListParams) {
-        setAntiListParams(storedAntiListParams.split(','));
+        setAntiListParams(storedAntiListParams.match(/([^,\s]+(?:\s+[^,\s]+)*)/g));
       } else {
         saveAntiListParamsToAsyncStorage(['Week']);
         setAntiListParams(['Week']);
@@ -191,7 +191,7 @@ const AntiTaskList = ({ navigation, route }) => {
   const l = getLang(selectedLanguage); // Get the lang object for the current language
 
   useEffect(() => {
-    navigation.setOptions({ title: selectedLanguage === 'no' ? "Ikke gjøre" : "Do" });
+    navigation.setOptions({ title: selectedLanguage === 'no' ? "Ikke gjøre" : "Don't do" });
   }, [selectedLanguage, navigation, l]);
 
   useEffect(() => {
@@ -345,6 +345,10 @@ const generateImage = async (prompt) => {
     if(antiListValue.includes("undefined")){
       setAntiListValue(antiListValue.replace(/undefined/g, ""));
     }
+      if(antiListValue.includes(",")){
+      setAntiListValue(antiListValue.replace(",", "，"));
+    }
+
   }, [antiListValue]);
 
   useEffect(() => {
@@ -482,12 +486,27 @@ const generateImage = async (prompt) => {
   };
 
   const clearAll = async () => {
+        Alert.alert(
+          l['OK?'], // Title
+          l['This will delete all your lists and tasks.'],
+          [
+            { text: 'OK', onPress: () => clearAllFinal() },
+            { text: 'Cancel', onPress: () => { console.log('Cancel Pressed');  } },
+          ],
+          { cancelable: true }
+        );
+  };
+
+  const clearAllFinal = async () => {
+
     try {
       await AsyncStorage.clear();
-      setAntiListValue("");
-      setAntiListParams(['Week']);
-      setAntiListParam("Week");
-      setAntiCheckedItems({});
+      setImageURL('')
+      setImages([])
+      setListValue("");
+      setListParams(['Week']);
+      setListParam("Week");
+      setCheckedItems({});
     } catch (error) {
       console.error('Error clearing AsyncStorage:', error);
     }
@@ -595,7 +614,7 @@ const sentencesNo = [
                 text={value}
                 iconStyle={{ borderColor: "white" }}
                 innerIconStyle={{ borderWidth: 0 }}
-                textStyle={{ fontFamily: "Roboto", width: 280, flexWrap: 'wrap' }}
+                textStyle={{ fontFamily: "Roboto", width: 230, flexWrap: 'wrap' }}
                 isChecked={antiCheckedItems[id] === 'true' || antiCheckedItems[id] === true}
                 onPress={(isChecked) => handleCheckboxChange(id, isChecked)}
               />
@@ -656,6 +675,7 @@ const sentencesNo = [
 
     const newAntiList = async (newAntiListName) => {
       if (antiListParams.includes(newAntiListName)) {
+        handleLinkPress(newAntiListName)
         console.warn(`AntiList with the name "${newAntiListName}" already exists.`);
         return;
       }
